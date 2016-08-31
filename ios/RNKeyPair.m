@@ -1,7 +1,6 @@
 // Heavily based off https://github.com/kuapay/iOS-Certificate--Key--and-Trust-Sample-Project
 
 #import "RNKeyPair.h"
-#import "SecKeyWrapper.h"
 #import "NSData+Base64.h"
 #import "NSString+Base64.h"
 
