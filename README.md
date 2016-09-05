@@ -1,6 +1,19 @@
 
 # react-native-key-pair
 
+A native implementation of Public/Private RSA key genaration.
+
+## Usage
+
+```
+import KeyPair from 'react-native-key-pair'
+KeyPair.generate((keys)=>{
+   console.log(keys.private) // the private key
+   console.log(keys.public) // the public key
+})
+```
+
+
 ## Getting started
 
 `$ npm install react-native-key-pair --save`
