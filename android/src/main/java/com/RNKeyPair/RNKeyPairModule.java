@@ -10,15 +10,19 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.WritableNativeMap;
 
-import java.security.KeyFactory;
+import java.io.StringWriter;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.HashMap;
-import java.security.spec.X509EncodedKeySpec;
+
+
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.ASN1Primitive;
+import org.spongycastle.asn1.pkcs.PrivateKeyInfo;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.util.io.pem.PemObject;
+import org.spongycastle.util.io.pem.PemWriter;
+
 
 public class RNKeyPairModule extends ReactContextBaseJavaModule {
 
@@ -46,26 +50,36 @@ public class RNKeyPairModule extends ReactContextBaseJavaModule {
       byte[] publicKey = keyPair.getPublic().getEncoded();
       byte[] privateKey = keyPair.getPrivate().getEncoded();
 
-      X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(publicKey);
-      KeyFactory keyFact = KeyFactory.getInstance("RSA", "BC");
-      String publicKeyString = Base64.encodeToString(keyFact.generatePublic(x509KeySpec).getEncoded(),0);
 
-      PKCS8EncodedKeySpec spec =
-              new PKCS8EncodedKeySpec(privateKey);
-      KeyFactory kf = KeyFactory.getInstance("RSA");
-      String privateKeyString = Base64.encodeToString(kf.generatePrivate(spec).getEncoded(),0);
+      SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(publicKey);
+      ASN1Primitive primitive = spkInfo.parsePublicKey();
+      byte[] publicKeyPKCS1 = primitive.getEncoded();
 
-      keys.putString("public", "-----BEGIN PUBLIC KEY-----\n" + publicKeyString + "\n-----END PUBLIC KEY-----");
-      keys.putString("private", "-----BEGIN RSA PRIVATE KEY-----\n" + privateKeyString + "\n-----END RSA PRIVATE KEY-----");
+      PemObject pemObject = new PemObject("RSA PUBLIC KEY", publicKeyPKCS1);
+      StringWriter stringWriter = new StringWriter();
+      PemWriter pemWriter = new PemWriter(stringWriter);
+      pemWriter.writeObject(pemObject);
+      pemWriter.close();
+      keys.putString("public", stringWriter.toString());
+
+      PrivateKeyInfo pkInfo = PrivateKeyInfo.getInstance(privateKey);
+      ASN1Encodable encodeable = pkInfo.parsePrivateKey();
+      ASN1Primitive primitive2 = encodeable.toASN1Primitive();
+      byte[] privateKeyPKCS1 = primitive2.getEncoded();
+
+      PemObject pemObject2 = new PemObject("RSA PRIVATE KEY", privateKeyPKCS1);
+      StringWriter stringWriter2 = new StringWriter();
+      PemWriter pemWriter2 = new PemWriter(stringWriter2);
+      pemWriter2.writeObject(pemObject2);
+      pemWriter2.close();
+      keys.putString("private", stringWriter2.toString());
     }
-    catch(InvalidKeySpecException e){
-      // don't care
-    }
+
     catch(NoSuchAlgorithmException e) {
     }
-    catch(NoSuchProviderException e) {
-    }
+    catch(java.io.IOException e) {
 
+    }
     callback.invoke(keys);
   }
 }
