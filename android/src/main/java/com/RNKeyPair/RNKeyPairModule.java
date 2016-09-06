@@ -16,6 +16,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.HashMap;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -47,10 +48,15 @@ public class RNKeyPairModule extends ReactContextBaseJavaModule {
 
       X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(publicKey);
       KeyFactory keyFact = KeyFactory.getInstance("RSA", "BC");
-      String keyString = Base64.encodeToString(keyFact.generatePublic(x509KeySpec).getEncoded(),0);
+      String publicKeyString = Base64.encodeToString(keyFact.generatePublic(x509KeySpec).getEncoded(),0);
 
-      keys.putString("public", keyString);
-      keys.putString("private", "345");
+      PKCS8EncodedKeySpec spec =
+              new PKCS8EncodedKeySpec(privateKey);
+      KeyFactory kf = KeyFactory.getInstance("RSA");
+      String privateKeyString = Base64.encodeToString(kf.generatePrivate(spec).getEncoded(),0);
+
+      keys.putString("public", "-----BEGIN PUBLIC KEY-----\n" + publicKeyString + "\n-----END PUBLIC KEY-----");
+      keys.putString("private", "-----BEGIN RSA PRIVATE KEY-----\n" + privateKeyString + "\n-----END RSA PRIVATE KEY-----");
     }
     catch(InvalidKeySpecException e){
       // don't care
