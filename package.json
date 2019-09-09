@@ -1,14 +1,16 @@
 {
   "name": "react-native-key-pair",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "RSA key public key generator for iOS and Android",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "react-native", "rsa"
+    "react-native",
+    "rsa"
   ],
   "author": "Sam Saffron",
+  "homepage": "https://github.com/samsaffron/react-native-key-pair",
   "license": "MIT"
 }
