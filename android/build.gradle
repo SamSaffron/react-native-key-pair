@@ -17,3 +17,8 @@ android {
        warning 'InvalidPackage'
     }
 }
+
+dependencies {
+    implementation 'com.facebook.react:react-native:0.20.+'
+    implementation files('core-1.54.0.0.jar')
+}
